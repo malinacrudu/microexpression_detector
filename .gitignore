@@ -1,0 +1,9 @@
+*.pdf
+*.jpg
+*.png
+*.mp4
+.idea/mirpr-emotional.iml
+.idea/misc.xml
+*.h5
+*.json
+*.csv
