@@ -11,6 +11,10 @@ from LBP import LocalBinaryPatterns
 np.set_printoptions(threshold=sys.maxsize)
 
 
+# a function that creates a map where for each folder
+# (in each folder it is a microexpression represented as a
+# set of images which are frames extracted from a video)
+# associates the emotion displayed
 def getClassification():
     labels = {}
     with open('CASME2-coding-20190701.csv', mode='r')as file:
@@ -21,6 +25,7 @@ def getClassification():
     return labels
 
 
+# a function that gets all the images and creates the input and output sets
 def getData():
     images = glob.glob('Cropped-updated/Cropped/*/*/*.jpg', recursive=True)
     input_set = []
@@ -33,14 +38,18 @@ def getData():
     return input_set, output_set
 
 
+# a function that takes all the input images
+# processes them and saves them
 def processData():
     images = glob.glob('Cropped-updated/Cropped/*/*/*.jpg', recursive=True)
     for imgPath in images:
         image = cv2.imread(imgPath)
-        new_image = adjusted_detect_face(image, (200, 250))
+        new_image = processImage(image, (200, 250))
         cv2.imwrite(imgPath, new_image)
 
 
+# a function that divides the data into training and validation
+# with a ration of 80:20
 def divideData(input, output):
     np.random.seed(5)
     indexes = [i for i in range(len(input))]
@@ -55,19 +64,24 @@ def divideData(input, output):
     return trainingInputSet, trainingOutputSet, validationInputSet, validationOutputSet
 
 
-def adjusted_detect_face(img, dimTuple):
+# a function that given an image
+# applies a black and white filter over it
+# and resizes it a specific size given as a tuple
+def processImage(img, dimTuple):
     face_img = img.copy()
     gray = cv2.cvtColor(face_img, cv2.COLOR_BGR2GRAY)
     gray = cv2.resize(gray, dimTuple)
     return gray
 
 
-def calculateHistograms(trainingInputSet):
+# a function that creates an LBP histogram for each black and white
+# image corresponding to the element in the input set
+def calculateHistograms(inputSet):
     desc = LocalBinaryPatterns(8, 1, 50)
     data = []
-    for i in range(len(trainingInputSet)):
+    for i in range(len(inputSet)):
         print(i)
-        imagePath = trainingInputSet[i]
+        imagePath = inputSet[i]
         image = cv2.imread(imagePath)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         hist = desc.describe(image)
@@ -75,6 +89,8 @@ def calculateHistograms(trainingInputSet):
     return data
 
 
+# having the input and output data it removes the
+# data that has "others" as a category for emotions
 def createData():
     input_set, output_set = getData()
     new_input = []
@@ -87,6 +103,9 @@ def createData():
     return new_input, new_output
 
 
+# creates a SVM model with the help of sklearn library
+# as arguments it has input data (X) and output data (y)
+# and it runs the train-test process 20 times
 def svm_model(X, y):
     trials = 20
     while trials:
@@ -99,9 +118,11 @@ def svm_model(X, y):
         trials -= 1
 
 
-def oneHotEncoding(categories):
+# creates the vector based on One Hot Encoding given the
+# outputLabels vector
+def oneHotEncoding(outputLabels):
     label = LabelEncoder()
-    int_data = label.fit_transform(categories)
+    int_data = label.fit_transform(outputLabels)
     int_data = int_data.reshape(len(int_data), 1)
     onehot_data = OneHotEncoder(sparse=False)
     onehot_data = onehot_data.fit_transform(int_data)
@@ -110,6 +131,7 @@ def oneHotEncoding(categories):
     return onehot_data
 
 
+# logs a message in the logs file with a specific message and current date
 def log_message(data):
     f = open("logs.txt", "a")
     f.write(str(data) + " " + str(date.today()) + "\n")

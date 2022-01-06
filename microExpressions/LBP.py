@@ -10,9 +10,6 @@ class LocalBinaryPatterns:
         self.scale = scale
 
     def describe(self, image, eps=1e-7):
-        # compute the Local Binary Pattern representation
-        # of the image, and then use the LBP representation
-        # to build the histogram of patterns
         grand_hist = []
         for y in range(0, len(image), self.scale):
             for x in range(0, len(image[0]), self.scale):
@@ -23,10 +20,6 @@ class LocalBinaryPatterns:
                                          bins=np.arange(257))
 
                 grand_hist += hist.tolist()
-        # # normalize the histogram
-        # hist = hist.astype("float")
-        # hist /= (hist.sum() + eps)
-        # # return the histogram of Local Binary Patterns
         return grand_hist
 
 
