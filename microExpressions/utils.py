@@ -3,8 +3,9 @@ import sys
 from datetime import date
 import cv2
 import numpy as np
-from sklearn import svm
-from sklearn.model_selection import train_test_split
+import pandas as pd
+import seaborn as sn
+import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from LBP import LocalBinaryPatterns
 
@@ -12,7 +13,7 @@ np.set_printoptions(threshold=sys.maxsize)
 
 
 # a function that creates a map where for each folder
-# (in each folder it is a microexpression represented as a
+# (in each folder it is a micro-expression represented as a
 # set of images which are frames extracted from a video)
 # associates the emotion displayed
 def getClassification():
@@ -54,7 +55,7 @@ def divideData(input, output):
     np.random.seed(5)
     indexes = [i for i in range(len(input))]
     trainSample = np.random.choice(indexes, int(0.8 * len(input)), replace=False)
-    testSample = [i for i in indexes if not i in trainSample]
+    testSample = [i for i in indexes if i not in trainSample]
 
     trainingInputSet = [input[i] for i in trainSample]
     trainingOutputSet = [output[i] for i in trainSample]
@@ -103,31 +104,16 @@ def createData():
     return new_input, new_output
 
 
-# creates a SVM model with the help of sklearn library
-# as arguments it has input data (X) and output data (y)
-# and it runs the train-test process 20 times
-def svm_model(X, y):
-    trials = 20
-    while trials:
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=23)
-        clf = svm.SVC(kernel='linear')
-        clf.fit(X_train, y_train)
-        y_pred = clf.predict(X_test)
-        from sklearn import metrics
-        log_message("Accuracy: " + str(metrics.accuracy_score(y_test, y_pred)) + " Trial: " + str(trials))
-        trials -= 1
-
-
 # creates the vector based on One Hot Encoding given the
 # outputLabels vector
 def oneHotEncoding(outputLabels):
     label = LabelEncoder()
     int_data = label.fit_transform(outputLabels)
+    print(label.classes_)
     int_data = int_data.reshape(len(int_data), 1)
     onehot_data = OneHotEncoder(sparse=False)
     onehot_data = onehot_data.fit_transform(int_data)
     onehot_data = np.argmax(onehot_data, axis=1)
-    print(onehot_data)
     return onehot_data
 
 
@@ -136,3 +122,62 @@ def log_message(data):
     f = open("logs.txt", "a")
     f.write(str(data) + " " + str(date.today()) + "\n")
     f.close()
+
+
+def writeToCsv():
+    input_set, output_set = createData()
+    data = calculateHistograms(input_set, output_set)
+    print(len(data))
+    # import csv
+    # filename = "data.csv"
+    # print(len(data))
+    # with open(filename, 'w', newline='') as csvfile:
+    #     csvwriter = csv.writer(csvfile)
+    #     csvwriter.writerows(data)
+
+
+# a function that creates and saves a histogram
+def makeHistogram(labels):
+    N, bins, patches = plt.hist(labels, bins=5, edgecolor='white', linewidth=1)
+    patches[0].set_facecolor('tomato')
+    patches[1].set_facecolor('greenyellow')
+    patches[1].set_facecolor('mediumorchid')
+    patches[2].set_facecolor('gold')
+    patches[3].set_facecolor('sandybrown')
+    patches[4].set_facecolor('cornflowerblue')
+    plt.title('Class distribution')
+    plt.xlabel('Emotion')
+    plt.ylabel('Number of samples')
+    plt.savefig("dataset.png")
+    plt.show()
+
+
+# a function that maps every digit from 0 to 4 to a different emotion from
+# the set of labels used in our classification
+def fromDigitToEmotion(digit):
+    if digit == 0:
+        return 'disgust'
+    elif digit == 1:
+        return 'happiness'
+    if digit == 2:
+        return 'repression'
+    if digit == 3:
+        return 'sadness'
+    if digit == 4:
+        return 'surprise'
+
+
+# a function that creates a confusion matrix
+def createConfusionMatrix(labelsComputed, labelsTrue):
+    labelC = []
+    labelV = []
+    for i in range(len(labelsComputed)):
+        labelC.append(fromDigitToEmotion(labelsComputed[i]))
+        labelV.append(fromDigitToEmotion(labelsTrue[i]))
+    data = {'y_Actual': labelV,
+            'y_Predicted': labelC
+            }
+    df = pd.DataFrame(data, columns=['y_Actual', 'y_Predicted'])
+    confusion_matrix = pd.crosstab(df['y_Actual'], df['y_Predicted'], rownames=['Actual'], colnames=['Predicted'])
+    sn.heatmap(confusion_matrix, annot=True, cmap="Pastel2")
+    plt.savefig("confusion.png")
