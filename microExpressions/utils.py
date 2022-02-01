@@ -174,9 +174,10 @@ def createConfusionMatrix(labelsComputed, labelsTrue):
     for i in range(len(labelsComputed)):
         labelC.append(fromDigitToEmotion(labelsComputed[i]))
         labelV.append(fromDigitToEmotion(labelsTrue[i]))
-    data = {'y_Actual': labelV,
+    data = {
+            'y_Actual': labelV,
             'y_Predicted': labelC
-            }
+           }
     df = pd.DataFrame(data, columns=['y_Actual', 'y_Predicted'])
     confusion_matrix = pd.crosstab(df['y_Actual'], df['y_Predicted'], rownames=['Actual'], colnames=['Predicted'])
     sn.heatmap(confusion_matrix, annot=True, cmap="Pastel2")
