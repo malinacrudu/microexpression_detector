@@ -12,6 +12,31 @@ from LBP import LocalBinaryPatterns
 np.set_printoptions(threshold=sys.maxsize)
 
 
+# a function that gets the input and output
+# for both problems: facial recognition and emotion detection
+def getDataChildren(path):
+    images = glob.glob(path, recursive=True)
+    inputEmo = []
+    outputEmo = []
+    for image in images:
+        inputEmo.append(image)
+        if 'surprise' in image:
+            outputEmo.append('surprise')
+        if 'sad' in image:
+            outputEmo.append('sadness')
+        if 'neutral' in image:
+            outputEmo.append('others')
+        if 'happy' in image:
+            outputEmo.append('happiness')
+        if 'fear' in image:
+            outputEmo.append('fear')
+        if 'disgust' in image:
+            outputEmo.append('disgust')
+        if 'angry' in image:
+            outputEmo.append('others')
+    return inputEmo, outputEmo
+
+
 # a function that creates a map where for each folder
 # (in each folder it is a micro-expression represented as a
 # set of images which are frames extracted from a video)
@@ -78,7 +103,7 @@ def processImage(img, dimTuple):
 # a function that creates an LBP histogram for each black and white
 # image corresponding to the element in the input set
 def calculateHistograms(inputSet):
-    desc = LocalBinaryPatterns(8, 1, 50)
+    desc = LocalBinaryPatterns(8, 1, 64)
     data = []
     for i in range(len(inputSet)):
         print(i)
@@ -103,6 +128,18 @@ def createData():
     new_output = oneHotEncoding(new_output)
     return new_input, new_output
 
+
+
+def createDataChildren():
+    input_set, output_set = getDataChildren("C:\\Users\\Utilizator\\Desktop\\anul3\\Sem1\\Calcul afectiv\\microexpression_detector\\microExpressions\\poze_procesate\\*.jpg")
+    new_input = []
+    new_output = []
+    for i in range(len(input_set)):
+        if output_set[i] != "others":
+            new_input.append(input_set[i])
+            new_output.append(output_set[i])
+    new_output = oneHotEncoding(new_output)
+    return new_input, new_output
 
 # creates the vector based on One Hot Encoding given the
 # outputLabels vector
@@ -175,10 +212,13 @@ def createConfusionMatrix(labelsComputed, labelsTrue):
         labelC.append(fromDigitToEmotion(labelsComputed[i]))
         labelV.append(fromDigitToEmotion(labelsTrue[i]))
     data = {
-            'y_Actual': labelV,
-            'y_Predicted': labelC
-           }
+        'y_Actual': labelV,
+        'y_Predicted': labelC
+    }
     df = pd.DataFrame(data, columns=['y_Actual', 'y_Predicted'])
     confusion_matrix = pd.crosstab(df['y_Actual'], df['y_Predicted'], rownames=['Actual'], colnames=['Predicted'])
     sn.heatmap(confusion_matrix, annot=True, cmap="Pastel2")
     plt.savefig("confusion.png")
+
+
+print()
