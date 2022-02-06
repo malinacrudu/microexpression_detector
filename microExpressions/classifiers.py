@@ -11,6 +11,7 @@ from utils import log_message, createConfusionMatrix
 # as arguments it has input data (X) and output data (y)
 # and it runs the train-test process 20 times
 def svm_model(X, y):
+    log_message("--------------------------SVM--------------------------")
     trials = 20
     ok = 1
     while trials:
@@ -65,6 +66,7 @@ def bayes_model(X, y):
 
 
 def neural_network_model(X, y):
+    log_message("--------------------------MLP--------------------------")
     trials = 20
     ok = 1
     while trials:
