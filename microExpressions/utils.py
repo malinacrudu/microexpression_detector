@@ -8,6 +8,7 @@ import seaborn as sn
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from LBP import LocalBinaryPatterns
+
 np.set_printoptions(threshold=sys.maxsize)
 
 
@@ -33,6 +34,31 @@ def getDataChildren(path):
             outputEmo.append('disgust')
         if 'angry' in image:
             outputEmo.append('others')
+    return inputEmo, outputEmo
+
+
+# a function that gets the input and output
+# for both problems: facial recognition and emotion detection
+def getDataCK(path):
+    images = glob.glob(path, recursive=True)
+    inputEmo = []
+    outputEmo = []
+    for image in images:
+        inputEmo.append(image)
+        if 'anger' in image:
+            outputEmo.append('others')
+        if 'contempt' in image:
+            outputEmo.append('others')
+        if 'disgust' in image:
+            outputEmo.append('disgust')
+        if 'fear' in image:
+            outputEmo.append('fear')
+        if 'happy' in image:
+            outputEmo.append('happiness')
+        if 'surprise' in image:
+            outputEmo.append('surprise')
+        if 'sadness' in image:
+            outputEmo.append('sadness')
     return inputEmo, outputEmo
 
 
@@ -102,7 +128,7 @@ def processImage(img, dimTuple):
 # a function that creates an LBP histogram for each black and white
 # image corresponding to the element in the input set
 def calculateHistograms(inputSet, resizeDim=(320, 320), necessaryResize=False):
-    desc = LocalBinaryPatterns(8, 1, 64)
+    desc = LocalBinaryPatterns(8, 1, 48)
     data = []
     for i in range(len(inputSet)):
         print(i)
@@ -127,6 +153,21 @@ def createData():
             new_input.append(input_set[i])
             new_output.append(output_set[i])
     new_output = oneHotEncoding(new_output)
+    return new_input, new_output
+
+
+def createDataCK():
+    input_set, output_set = getDataCK(
+        "C:\\Users\\Utilizator\\Desktop\\anul3\\Sem1\\Calcul afectiv\\microexpression_detector\\microExpressions\\CK+48\\*\\*.png")
+    new_input = []
+    new_output = []
+    for i in range(len(input_set)):
+        if output_set[i] != "others":
+            new_input.append(input_set[i])
+            new_output.append(output_set[i])
+    new_output = oneHotEncoding(new_output)
+    print(len(new_input))
+    print(len(new_output))
     return new_input, new_output
 
 
@@ -160,7 +201,7 @@ def oneHotEncoding(outputLabels):
 
 # logs a message in the logs file with a specific message and current date
 def log_message(data):
-    f = open("logs.txt", "a")
+    f = open("logs_CK+48.txt", "a")
     f.write(str(data) + " " + str(date.today()) + "\n")
     f.close()
 
