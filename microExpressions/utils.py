@@ -8,7 +8,6 @@ import seaborn as sn
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from LBP import LocalBinaryPatterns
-
 np.set_printoptions(threshold=sys.maxsize)
 
 
@@ -102,13 +101,15 @@ def processImage(img, dimTuple):
 
 # a function that creates an LBP histogram for each black and white
 # image corresponding to the element in the input set
-def calculateHistograms(inputSet):
+def calculateHistograms(inputSet, resizeDim=(320, 320), necessaryResize=False):
     desc = LocalBinaryPatterns(8, 1, 64)
     data = []
     for i in range(len(inputSet)):
         print(i)
         imagePath = inputSet[i]
         image = cv2.imread(imagePath)
+        if necessaryResize:
+            image = cv2.resize(image, resizeDim)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         hist = desc.describe(image)
         data.append(hist)
@@ -129,9 +130,9 @@ def createData():
     return new_input, new_output
 
 
-
 def createDataChildren():
-    input_set, output_set = getDataChildren("C:\\Users\\Utilizator\\Desktop\\anul3\\Sem1\\Calcul afectiv\\microexpression_detector\\microExpressions\\poze_procesate\\*.jpg")
+    input_set, output_set = getDataChildren(
+        "C:\\Users\\Utilizator\\Desktop\\anul3\\Sem1\\Calcul afectiv\\microexpression_detector\\microExpressions\\poze_procesate\\*.jpg")
     new_input = []
     new_output = []
     for i in range(len(input_set)):
@@ -139,7 +140,10 @@ def createDataChildren():
             new_input.append(input_set[i])
             new_output.append(output_set[i])
     new_output = oneHotEncoding(new_output)
+    print(len(new_input))
+    print(len(new_output))
     return new_input, new_output
+
 
 # creates the vector based on One Hot Encoding given the
 # outputLabels vector
@@ -156,7 +160,7 @@ def oneHotEncoding(outputLabels):
 
 # logs a message in the logs file with a specific message and current date
 def log_message(data):
-    f = open("logs.txt", "a")
+    f = open("logs_Raluca_training.txt", "a")
     f.write(str(data) + " " + str(date.today()) + "\n")
     f.close()
 
@@ -219,6 +223,3 @@ def createConfusionMatrix(labelsComputed, labelsTrue):
     confusion_matrix = pd.crosstab(df['y_Actual'], df['y_Predicted'], rownames=['Actual'], colnames=['Predicted'])
     sn.heatmap(confusion_matrix, annot=True, cmap="Pastel2")
     plt.savefig("confusion.png")
-
-
-print()
