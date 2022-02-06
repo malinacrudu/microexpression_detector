@@ -160,7 +160,7 @@ def oneHotEncoding(outputLabels):
 
 # logs a message in the logs file with a specific message and current date
 def log_message(data):
-    f = open("logs_Raluca_training.txt", "a")
+    f = open("logs.txt", "a")
     f.write(str(data) + " " + str(date.today()) + "\n")
     f.close()
 
