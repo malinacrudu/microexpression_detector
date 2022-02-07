@@ -264,3 +264,41 @@ def createConfusionMatrix(labelsComputed, labelsTrue):
     confusion_matrix = pd.crosstab(df['y_Actual'], df['y_Predicted'], rownames=['Actual'], colnames=['Predicted'])
     sn.heatmap(confusion_matrix, annot=True, cmap="Pastel2")
     plt.savefig("confusion.png")
+
+def getDataKarolinska(path):
+    # https://www.kdef.se/home/aboutKDEF.html
+    images = glob.glob(path, recursive=True)
+    inputEmo = []
+    outputEmo = []
+    for image in images:
+        inputEmo.append(image)
+        if 'SU' in image:
+            outputEmo.append('surprise')
+        if 'SA' in image:
+            outputEmo.append('sadness')
+        if 'NE' in image:
+            outputEmo.append('others')
+        if 'HA' in image:
+            outputEmo.append('happiness')
+        if 'AF' in image:
+            outputEmo.append('fear')
+        if 'AN' in image:
+            outputEmo.append('others')
+        if 'DI' in image:
+            outputEmo.append('disgust')
+    return inputEmo, outputEmo
+
+
+def createDataKarolinska():
+    input_set, output_set = getDataKarolinska(
+        "E:\\An3Sem1\MA\\microexpression_detector\\microExpressions\\KDEF (reeks A) zonder haarlijn*.jpg")
+    new_input = []
+    new_output = []
+    for i in range(len(input_set)):
+        if output_set[i] != "others":
+            new_input.append(input_set[i])
+            new_output.append(output_set[i])
+    new_output = oneHotEncoding(new_output)
+    print(len(new_input))
+    print(len(new_output))
+    return new_input, new_output
