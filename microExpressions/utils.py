@@ -201,7 +201,7 @@ def oneHotEncoding(outputLabels):
 
 # logs a message in the logs file with a specific message and current date
 def log_message(data):
-    f = open("logs_CK+48.txt", "a")
+    f = open("logs_decision_trees.txt", "a")
     f.write(str(data) + " " + str(date.today()) + "\n")
     f.close()
 
@@ -265,6 +265,7 @@ def createConfusionMatrix(labelsComputed, labelsTrue):
     sn.heatmap(confusion_matrix, annot=True, cmap="Pastel2")
     plt.savefig("confusion.png")
 
+
 def getDataKarolinska(path):
     # https://www.kdef.se/home/aboutKDEF.html
     images = glob.glob(path, recursive=True)
@@ -290,8 +291,7 @@ def getDataKarolinska(path):
 
 
 def createDataKarolinska():
-    input_set, output_set = getDataKarolinska(
-        "E:\\An3Sem1\MA\\microexpression_detector\\microExpressions\\KDEF (reeks A) zonder haarlijn*.jpg")
+    input_set, output_set = getDataKarolinska("C:\\Users\\Utilizator\\Desktop\\anul3\\Sem1\\Calcul afectiv\\microexpression_detector\\microExpressions\\KDEF (reeks A) zonder haarlijn\\*.jpg")
     new_input = []
     new_output = []
     for i in range(len(input_set)):
@@ -301,4 +301,5 @@ def createDataKarolinska():
     new_output = oneHotEncoding(new_output)
     print(len(new_input))
     print(len(new_output))
+    print(new_output)
     return new_input, new_output
