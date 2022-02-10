@@ -1,9 +1,10 @@
 from classifiers import *
 from utils import *
+
 import random
 
 # get the data
-input_set, output_set = createDataKarolinska()
+input_set, output_set = createData()
 y = output_set
 # calculate histograms
 X = calculateHistograms(input_set)
@@ -22,3 +23,4 @@ decision_trees_model(X, y)
 
 # https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html
 # https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_curve.html
+# https://learnopencv.com/histogram-of-oriented-gradients/

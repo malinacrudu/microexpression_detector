@@ -149,6 +149,8 @@ def createData():
     new_input = []
     new_output = []
     for i in range(len(input_set)):
+        if i>5:
+            break
         if output_set[i] != "others":
             new_input.append(input_set[i])
             new_output.append(output_set[i])
