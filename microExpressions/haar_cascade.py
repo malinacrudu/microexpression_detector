@@ -3,6 +3,7 @@ import glob
 import math
 
 
+
 def detect_eyes(img):
     # Read in the cascade classifiers for eyes
     eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')

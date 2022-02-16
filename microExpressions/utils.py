@@ -8,6 +8,7 @@ import seaborn as sn
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from LBP import LocalBinaryPatterns
+from LBPTOP import LocalBinaryTOP
 
 np.set_printoptions(threshold=sys.maxsize)
 
@@ -128,7 +129,7 @@ def processImage(img, dimTuple):
 # a function that creates an LBP histogram for each black and white
 # image corresponding to the element in the input set
 def calculateHistograms(inputSet, resizeDim=(320, 320), necessaryResize=False):
-    desc = LocalBinaryPatterns(8, 1, 48)
+    desc = LocalBinaryPatterns(8, 1, 50)
     data = []
     for i in range(len(inputSet)):
         print(i)
@@ -139,7 +140,36 @@ def calculateHistograms(inputSet, resizeDim=(320, 320), necessaryResize=False):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         hist = desc.describe(image)
         data.append(hist)
+        break
+    print(len(data[0]))
     return data
+
+
+def calculateHistogramsWithLBPTOP(inputSet, outputSet):
+    desc = LocalBinaryTOP(8, 1, 50)
+    data = []
+    output = []
+    folder = inputSet[0].split('\\')[2]
+    for i in range(1, len(inputSet) - 1):
+        print(i)
+        currentFolder = inputSet[i].split('\\')[2]
+        if currentFolder == folder:
+            imagePathFront = inputSet[i - 1]
+            imagePathMiddle = inputSet[i]
+            imagePathBack = inputSet[i + 1]
+            imageFront = cv2.imread(imagePathFront)
+            imageMiddle = cv2.imread(imagePathMiddle)
+            imageBack = cv2.imread(imagePathBack)
+            imageF = cv2.cvtColor(imageFront, cv2.COLOR_BGR2GRAY)
+            imageM = cv2.cvtColor(imageMiddle, cv2.COLOR_BGR2GRAY)
+            imageB = cv2.cvtColor(imageBack, cv2.COLOR_BGR2GRAY)
+            hist = desc.describe(imageM, imageF, imageB)
+            data.append(hist)
+            output.append(outputSet[i])
+        else:
+            folder = currentFolder
+            i += 1
+    return data, output
 
 
 # having the input and output data it removes the
@@ -149,8 +179,6 @@ def createData():
     new_input = []
     new_output = []
     for i in range(len(input_set)):
-        if i>5:
-            break
         if output_set[i] != "others":
             new_input.append(input_set[i])
             new_output.append(output_set[i])
@@ -168,8 +196,6 @@ def createDataCK():
             new_input.append(input_set[i])
             new_output.append(output_set[i])
     new_output = oneHotEncoding(new_output)
-    print(len(new_input))
-    print(len(new_output))
     return new_input, new_output
 
 
@@ -183,8 +209,6 @@ def createDataChildren():
             new_input.append(input_set[i])
             new_output.append(output_set[i])
     new_output = oneHotEncoding(new_output)
-    print(len(new_input))
-    print(len(new_output))
     return new_input, new_output
 
 
@@ -203,7 +227,7 @@ def oneHotEncoding(outputLabels):
 
 # logs a message in the logs file with a specific message and current date
 def log_message(data):
-    f = open("logs_decision_trees.txt", "a")
+    f = open("logs_LBP_TOP.txt", "a")
     f.write(str(data) + " " + str(date.today()) + "\n")
     f.close()
 
@@ -293,7 +317,8 @@ def getDataKarolinska(path):
 
 
 def createDataKarolinska():
-    input_set, output_set = getDataKarolinska("C:\\Users\\Utilizator\\Desktop\\anul3\\Sem1\\Calcul afectiv\\microexpression_detector\\microExpressions\\KDEF (reeks A) zonder haarlijn\\*.jpg")
+    input_set, output_set = getDataKarolinska(
+        "C:\\Users\\Utilizator\\Desktop\\anul3\\Sem1\\Calcul afectiv\\microexpression_detector\\microExpressions\\KDEF (reeks A) zonder haarlijn\\*.jpg")
     new_input = []
     new_output = []
     for i in range(len(input_set)):
